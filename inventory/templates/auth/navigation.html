@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand-lg bg-light">
+  <a class="navbar-brand" href="#"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c0/BAPEX.png/220px-BAPEX.png" width="90" height="50" style="padding-left: 15px;" class="d-inline-block align-top" alt="" /></a>
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'index' %}">Stationary Requisition System</a>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'requisition_list' %}" style="padding-top: 6px; padding-right: 56px;">Requisitions</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'requisition' %}" style="padding-top: 6px;padding-right: 56px;">Submit Requisition</a>
+            </li>
+          {% endif %}
+
+          <li class="nav-item">
+            <a class="nav-link" href="#" style="padding-top: 6px;">{{ user.username }}</a>
+          </li>
+
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn border-0 bg-transparent text-dark">Sign Out</button>
+          </form>
+
+          {% comment %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Sign Out</a>
+          </li>
+          {% endcomment %}
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Sign In</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

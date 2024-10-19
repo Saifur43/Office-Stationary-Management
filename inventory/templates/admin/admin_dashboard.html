@@ -1,0 +1,18 @@
+{% extends 'auth/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 col-12 mx-auto mt-5">
+        <h2>Admin Dashboard</h2>
+
+        <div class="list-group">
+            <br/>
+            <a href="{% url 'requisition_list' %}" class="list-group-item list-group-item-action">Requisitions</a>
+            <br/>
+            <a href="{% url 'add_inventory_item' %}" class="list-group-item list-group-item-action">Add New Inventory Item</a>
+            <br/>
+            <a href="{% url 'statistics' %}" class="list-group-item list-group-item-action">Statistics</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

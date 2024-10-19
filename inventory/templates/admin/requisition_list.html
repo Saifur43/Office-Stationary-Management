@@ -1,0 +1,37 @@
+{% extends 'auth/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 col-12 mx-auto mt-5">
+        <h2>Requisition List</h2>
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">User</th>
+                    <th scope="col">Date Created</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for requisition in requisitions %}
+                <tr>
+                    <th scope="row">{{ requisition.id }}</th>
+                    <td>{{ requisition.user.username }}</td>
+                    <td>{{ requisition.date_created }}</td>
+                    <td>{{ requisition.status }}</td>
+                    <td>
+                        {% if requisition.status not in "Approved,Rejected" %}
+                            <a href="{% url 'approve_requisition' requisition.id %}" class="btn btn-success">Approve</a>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>Approved</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

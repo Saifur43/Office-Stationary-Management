@@ -1,0 +1,41 @@
+{% extends 'auth/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 col-12 mx-auto mt-5">
+        <h2>Requisition ID: {{ requisition.id }}</h2>
+        <p>Date Created: {{ requisition.date_created }}</p>
+        <p>Status: {{ requisition.status }}</p>
+
+        <h3>Items in this Requisition</h3>
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Item Name</th>
+                    <th scope="col">Requested Quantity</th>
+                    <th scope="col">Approved Quantity</th>
+                    <th scope="col">Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in requisition.items.all %}
+                <tr>
+                    <td>{{ item.inventory_item.name }}</td>
+                    <td>{{ item.quantity_requested }}</td>
+                    <td>{{ item.quantity_approved }}</td>
+                    <td>{{ item.remarks|default:"N/A" }}</td> <!-- Display remarks or "N/A" if empty -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if requisition.status in "Approved,Rejected" %}
+        <div class="alert alert-info mt-3">
+            This requisition has been {{ requisition.status|lower }}. Further actions cannot be taken.
+        </div>
+        {% endif %}
+        
+        <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

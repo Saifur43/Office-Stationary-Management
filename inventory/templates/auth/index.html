@@ -1,0 +1,20 @@
+{% extends 'auth/base.html' %}
+
+{% block content %}
+<div>
+	<div class="row">
+		<div class="col-sm-11 col-md-4 mx-auto mt-5 px-3">
+			<h1 class="fw-light">Welcome to BAPEX Stationary Requisition System</h1>
+			<p class="fw-light">Keep track of your Stationary Item Requisition</p>
+
+			<div>
+				{% if user.is_staff %}
+				<a href="{% url 'admin_dashboard' %}" class="btn btn-primary">Dashboard</a>
+			  {% else %}
+			  <a href="{% url 'dashboard' %}" class="btn btn-primary">Dashboard</a>
+			  {% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock content %}
