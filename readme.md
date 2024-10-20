@@ -69,20 +69,6 @@ Ensure you have the following installed on your machine:
 
    Open a browser and navigate to `http://127.0.0.1:8000/`.
 
-## Folder Structure
-
-```
-├── inventory/              # Main Django app for inventory management
-│   ├── migrations/         # Database migrations
-│   ├── static/             # Static files (CSS, JS)
-│   ├── templates/          # HTML templates
-│   ├── models.py           # Database models
-│   ├── views.py            # Views for handling requests
-│   └── urls.py             # URL routing
-├── manage.py               # Django management script
-├── requirements.txt        # Python dependencies
-└── README.md               # Project documentation
-```
 
 ## Key Models
 
@@ -116,25 +102,6 @@ The project uses Django's crispy forms to enhance form layouts and uses custom f
 ### Reports
 - Admins can generate reports based on user, item, and date filters. The results can also be exported to PDF.
 
-## Testing
-
-To run tests, use the following command:
-
-```bash
-python manage.py test
-```
-
-## Deployment
-
-For deploying the application to a production environment:
-
-1. Set `DEBUG=False` in the `.env` file.
-2. Ensure that the database settings point to a production-ready database (e.g., PostgreSQL).
-3. Collect static files:
-   ```bash
-   python manage.py collectstatic
-   ```
-4. Set up a web server like Gunicorn and configure Nginx (if deploying on Linux).
 
 ## License
 
