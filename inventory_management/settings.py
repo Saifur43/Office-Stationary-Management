@@ -19,6 +19,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '192.168.7.115',
     '.vercel.app',
+    '.now.sh',
 ]
 
 # Application definition
