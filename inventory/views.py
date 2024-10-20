@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, View
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import UserRegisterForm, InventoryItemForm
+from .forms import UserRegisterForm, InventoryItemForm, ReportForm
 from inventory_management.settings import LOW_QUANTITY
 from .models import InventoryItem, Requisition, RequisitionItem
 from django.contrib import messages
@@ -10,7 +10,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.db.models import Sum
-
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from io import BytesIO
 
 
 class Index(TemplateView):
@@ -170,6 +173,78 @@ class StatItemDetailView(View):
             'item': item,
             'user_approved_stats': user_approved_stats
         })
+
+class ReportView(View):
+    def get(self, request):
+        form = ReportForm()
+        return render(request, 'admin/report.html', {'form': form})
+
+    def post(self, request):
+        form = ReportForm(request.POST)
+        
+        if form.is_valid():
+            user = form.cleaned_data.get('user')
+            item_name = form.cleaned_data.get('item')
+            date_from = form.cleaned_data.get('date_from')
+            date_to = form.cleaned_data.get('date_to')
+
+            # Filter requisition items based on the provided form inputs
+            requisition_items = RequisitionItem.objects.filter(requisition__status='Approved')
+            
+            # Filter by user if selected
+            if user:
+                requisition_items = requisition_items.filter(requisition__user=user)
+            
+            # Filter by item name if selected
+            if item_name:
+                requisition_items = requisition_items.filter(inventory_item__name=item_name)
+            
+            # Filter by date range if provided
+            if date_from:
+                requisition_items = requisition_items.filter(requisition__date_created__gte=date_from)
+            if date_to:
+                requisition_items = requisition_items.filter(requisition__date_created__lte=date_to)
+
+            # Generate a report as PDF if 'generate_pdf' button is clicked
+            if 'generate_pdf' in request.POST:
+                return self.generate_pdf(requisition_items, user, item_name, date_from, date_to)
+
+            # Render the filtered results
+            return render(request, 'admin/report.html', {
+                'form': form,
+                'requisition_items': requisition_items
+            })
+
+        # If the form is invalid, re-render the page with the form (and error messages)
+        return render(request, 'admin/report.html', {'form': form})
+
+    def generate_pdf(self, requisition_items, user, item_name, date_from, date_to):
+        template_path = 'admin/report_pdf.html'
+        context = {
+            'requisition_items': requisition_items,
+            'user': user,
+            'item': item_name,
+            'date_from': date_from,
+            'date_to': date_to
+        }
+
+        # Render the HTML template into a string
+        html = render_to_string(template_path, context)
+
+        # Create a PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+
+        # Create a PDF using xhtml2pdf
+        pisa_status = pisa.CreatePDF(
+            html, dest=response
+        )
+
+        # Return the response if no errors
+        if pisa_status.err:
+            return HttpResponse('We had some errors generating the PDF', status=500)
+        return response
+
 
 class SignUpView(View):
 	def get(self, request):

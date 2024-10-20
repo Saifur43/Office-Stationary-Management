@@ -21,6 +21,36 @@ class InventoryItemForm(forms.ModelForm):
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
 
+class ReportForm(forms.Form):
+    # Exclude staff members from the user dropdown
+    user = forms.ModelChoiceField(
+        queryset=User.objects.filter(is_staff=False),  # Exclude staff members
+        required=False,
+        label="User",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    # Use the full queryset but display only the item names in the dropdown
+    item = forms.ModelChoiceField(
+        queryset=InventoryItem.objects.all(),  # Full queryset
+        required=False,
+        label="Item",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    # Add date fields
+    date_from = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        required=False,
+        label="From Date"
+    )
+    date_to = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        required=False,
+        label="To Date"
+    )
+
+
 
 
 

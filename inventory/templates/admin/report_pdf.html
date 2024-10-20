@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>Report</h2>
+
+    <p><strong>User:</strong> {{ user.username}}</p>
+    <p><strong>Item:</strong> {{ item.name}}</p>
+    <p><strong>Date From:</strong> {{ date_from }}</p>
+    <p><strong>Date To:</strong> {{ date_to}}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Item</th>
+                <th>Requested Quantity</th>
+                <th>Approved Quantity</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in requisition_items %}
+            <tr>
+                <td>{{ item.requisition.user.username }}</td>
+                <td>{{ item.inventory_item.name }}</td>
+                <td>{{ item.quantity_requested }}</td>
+                <td>{{ item.quantity_approved }}</td>
+                <td>{{ item.requisition.date_created }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

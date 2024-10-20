@@ -1,0 +1,75 @@
+{% extends 'auth/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="text-center mb-0">Generate Report</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.user|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.item|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.date_from|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.date_to|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button type="submit" name="filter" class="btn btn-primary btn-sm px-4">Filter</button>
+                    <button type="submit" name="generate_pdf" class="btn btn-secondary btn-sm px-4">Generate PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if requisition_items %}
+    <div class="mt-4">
+        <h3 class="text-center">Filtered Results</h3>
+        <table class="table table-bordered table-hover table-striped mt-3">
+            <thead class="thead-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Item</th>
+                    <th>Requested Quantity</th>
+                    <th>Approved Quantity</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in requisition_items %}
+                <tr>
+                    <td>{{ item.requisition.user.username }}</td>
+                    <td>{{ item.inventory_item.name }}</td>
+                    <td>{{ item.quantity_requested }}</td>
+                    <td>{{ item.quantity_approved }}</td>
+                    <td>{{ item.requisition.date_created|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-center mt-3">No results found.</p>
+    {% endif %}
+</div>
+{% endblock %}
