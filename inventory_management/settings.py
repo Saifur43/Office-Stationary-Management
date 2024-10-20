@@ -18,8 +18,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '192.168.7.115',
+    '.vercel.app',
 ]
-
 
 # Application definition
 
