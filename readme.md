@@ -1,4 +1,4 @@
-# Django Inventory Management System
+# Office Stationary Management
 
 ## Overview
 
