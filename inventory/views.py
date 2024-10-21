@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import UserRegisterForm, InventoryItemForm, ReportForm
 from inventory_management.settings import LOW_QUANTITY
 from .models import InventoryItem, Requisition, RequisitionItem
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
@@ -14,6 +15,8 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from io import BytesIO
+from django.template.loader import get_template
+
 
 
 class Index(TemplateView):
@@ -116,10 +119,75 @@ class ApproveRequisitionView(LoginRequiredMixin, View):
         messages.success(request, "Requisition approved successfully!")
         return redirect('requisition_list')  # Redirect to the requisition list page
 
+from django.shortcuts import render
+from django.db.models import Q
+from django.views import View
+from .models import Requisition, User
+
 class RequisitionListView(LoginRequiredMixin, View):
     def get(self, request):
         requisitions = Requisition.objects.all().order_by('-date_created')
-        return render(request, 'admin/requisition_list.html', {'requisitions': requisitions})
+        
+        # Filter by Requisition ID
+        requisition_id = request.GET.get('requisition_id')
+        if requisition_id:
+            requisitions = requisitions.filter(id=requisition_id)
+        
+        # Filter by User
+        user_id = request.GET.get('user')
+        if user_id:
+            requisitions = requisitions.filter(user_id=user_id)
+        
+        # Filter by Status
+        status = request.GET.get('status')
+        if status:
+            requisitions = requisitions.filter(status=status)
+        
+        # Filter by Date Range
+        date_from = request.GET.get('date_from')
+        date_to = request.GET.get('date_to')
+        if date_from and date_to:
+            requisitions = requisitions.filter(date_created__range=[date_from, date_to])
+
+        # Pass the list of users for the filter dropdown
+        users = User.objects.all().exclude(is_staff=True)  # Exclude staff users
+        
+        return render(request, 'admin/requisition_list.html', {
+            'requisitions': requisitions,
+            'users': users,
+        })
+
+
+
+
+class RequisitionPDFView(LoginRequiredMixin, View):
+    def get(self, request, requisition_id):
+        requisition = Requisition.objects.get(id=requisition_id)
+        
+        if requisition.status != 'Approved':
+            return HttpResponse("Requisition is not approved yet.", status=403)
+
+        # Fetch requisition items
+        requisition_items = requisition.items.all()
+
+        # Render the HTML template with requisition details
+        template = get_template('admin/requisition_pdf.html')
+        context = {
+            'requisition': requisition,
+            'requisition_items': requisition_items
+        }
+        html = template.render(context)
+
+        # Generate PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="requisition_{requisition.id}.pdf"'
+        pisa_status = pisa.CreatePDF(html, dest=response)
+
+        if pisa_status.err:
+            return HttpResponse('Error occurred while generating PDF', status=500)
+
+        return response
+
 
 @method_decorator(staff_member_required, name='dispatch')
 class AdminDashboardView(LoginRequiredMixin, View):

@@ -4,6 +4,51 @@
 <div class="row">
     <div class="col-md-10 col-12 mx-auto mt-5">
         <h2>Requisition List</h2>
+
+        <!-- Filter Form -->
+        <form method="GET" class="mb-3" style="display: flex; flex-wrap: wrap;">
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-right: 10px;">
+                <label for="requisition_id">Requisition ID</label>
+                <input type="text" id="requisition_id" name="requisition_id" class="form-control" placeholder="" value="{{ request.GET.requisition_id }}">
+            </div>
+
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-right: 10px;">
+                <label for="user">User</label>
+                <select id="user" name="user" class="form-control">
+                    <option value="">-----</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-right: 10px;">
+                <label for="status">Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="">-----</option>
+                    <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="Approved" {% if request.GET.status == "Approved" %}selected{% endif %}>Approved</option>
+                    <option value="Rejected" {% if request.GET.status == "Rejected" %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-right: 10px;">
+                <label for="date_from">Date From</label>
+                <input type="date" id="date_from" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+            </div>
+
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-right: 10px;">
+                <label for="date_to">Date To</label>
+                <input type="date" id="date_to" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+            </div>
+
+            <!-- Search Button -->
+            <div class="form-group" style="flex: 1; min-width: 200px; margin-top: 30px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Search & Filter</button>
+            </div>
+        </form>
+
+        <!-- Requisition List Table -->
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
@@ -12,6 +57,7 @@
                     <th scope="col">Date Created</th>
                     <th scope="col">Status</th>
                     <th scope="col">Actions</th>
+                    <th scope="col">PDF</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,6 +72,13 @@
                             <a href="{% url 'approve_requisition' requisition.id %}" class="btn btn-success">Approve</a>
                         {% else %}
                             <button class="btn btn-secondary" disabled>Approved</button>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if requisition.status == 'Approved' %}
+                            <a href="{% url 'requisition_pdf' requisition.id %}" class="btn btn-info">PDF</a>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>No PDF</button>
                         {% endif %}
                     </td>
                 </tr>
