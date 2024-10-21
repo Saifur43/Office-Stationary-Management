@@ -16,7 +16,8 @@ from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from io import BytesIO
 from django.template.loader import get_template
-
+from django.db.models import Q
+from .models import Requisition, User
 
 
 class Index(TemplateView):
@@ -118,11 +119,6 @@ class ApproveRequisitionView(LoginRequiredMixin, View):
         requisition.save()
         messages.success(request, "Requisition approved successfully!")
         return redirect('requisition_list')  # Redirect to the requisition list page
-
-from django.shortcuts import render
-from django.db.models import Q
-from django.views import View
-from .models import Requisition, User
 
 class RequisitionListView(LoginRequiredMixin, View):
     def get(self, request):
