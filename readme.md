@@ -22,7 +22,7 @@ Ensure you have the following installed on your machine:
 
 - Python 3.x
 - Django 3.x or later
-- PostgreSQL or another database (can use SQLite for development)
+- SQLite or another database (can use SQLite for development)
 - pip (Python package installer)
 
 ### Setup

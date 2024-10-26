@@ -152,8 +152,7 @@ class RequisitionListView(LoginRequiredMixin, View):
             'requisitions': requisitions,
             'users': users,
         })
-
-
+"""
 class RequisitionPDFView(LoginRequiredMixin, View):
     def get(self, request, requisition_id):
         requisition = Requisition.objects.get(id=requisition_id)
@@ -165,7 +164,7 @@ class RequisitionPDFView(LoginRequiredMixin, View):
         requisition_items = requisition.items.all()
 
         # Render the HTML template with requisition details
-        template = get_template('admin/requisition_pdf.html')
+        template = get_template('admin/rqpdf.html')
         context = {
             'requisition': requisition,
             'requisition_items': requisition_items
@@ -181,8 +180,7 @@ class RequisitionPDFView(LoginRequiredMixin, View):
             return HttpResponse('Error occurred while generating PDF', status=500)
 
         return response
-
-
+"""
 @method_decorator(staff_member_required, name='dispatch')
 class AdminDashboardView(LoginRequiredMixin, View):
     def get(self, request):
@@ -342,3 +340,67 @@ class SignUpView(View):
 			return redirect('index')
 
 		return render(request, 'auth/signup.html', {'form': form})
+
+
+"""
+
+class RequisitionPDFView(LoginRequiredMixin, View):
+    def get(self, request, requisition_id):
+        requisition = Requisition.objects.get(id=requisition_id)
+
+        if requisition.status != 'Approved':
+            return HttpResponse("Requisition is not approved yet.", status=403)
+
+        # Fetch requisition items
+        requisition_items = requisition.items.all()
+
+        # Generate and return the PDF
+        return generate_requisition_pdf(requisition, requisition_items)
+"""
+
+
+from django.views import View
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
+from weasyprint import HTML
+from weasyprint.text.fonts import FontConfiguration
+import logging
+
+logger = logging.getLogger(__name__)
+
+class RequisitionPDFView(LoginRequiredMixin, View):
+    def get(self, request, requisition_id):
+        try:
+            # Get requisition
+            requisition = get_object_or_404(Requisition, id=requisition_id)
+            
+            if requisition.status != 'Approved':
+                return HttpResponse("Requisition is not approved yet.", status=403)
+
+            # Fetch items
+            requisition_items = requisition.items.all()
+
+            # Render HTML
+            html_string = render_to_string('admin/rqpdf.html', {
+                'requisition': requisition,
+                'requisition_items': requisition_items,
+            })
+
+            # Configure fonts
+            font_config = FontConfiguration()
+            
+            # Generate PDF
+            html = HTML(string=html_string)
+            pdf = html.write_pdf(font_config=font_config)
+
+            # Create response
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="requisition_{requisition.id}.pdf"'
+            
+            return response
+
+        except Exception as e:
+            logger.error(f'Error generating PDF: {str(e)}')
+            return HttpResponse('Error generating PDF', status=500)
