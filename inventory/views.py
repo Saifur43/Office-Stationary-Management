@@ -154,8 +154,6 @@ class RequisitionListView(LoginRequiredMixin, View):
         })
 
 
-
-
 class RequisitionPDFView(LoginRequiredMixin, View):
     def get(self, request, requisition_id):
         requisition = Requisition.objects.get(id=requisition_id)
