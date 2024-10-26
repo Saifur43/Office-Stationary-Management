@@ -50,6 +50,28 @@ class ReportForm(forms.Form):
         label="To Date"
     )
 
+class AddInventoryItemForm(forms.Form):
+    existing_item = forms.ModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=True,
+        label="Select Item",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    reference_no = forms.CharField(
+        max_length=200,
+        required=True,
+        label="Reference Number",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    quantity = forms.IntegerField(
+        min_value=1,
+        label="Quantity to Add",
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+
+
+
+
 
 
 

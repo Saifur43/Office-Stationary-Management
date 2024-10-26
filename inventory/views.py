@@ -2,9 +2,9 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, View
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import UserRegisterForm, InventoryItemForm, ReportForm
+from .forms import UserRegisterForm, InventoryItemForm, ReportForm, AddInventoryItemForm
 from inventory_management.settings import LOW_QUANTITY
-from .models import InventoryItem, Requisition, RequisitionItem
+from .models import InventoryItem, Requisition, RequisitionItem, UpdateLog
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
@@ -197,15 +197,30 @@ class AdminDashboardView(LoginRequiredMixin, View):
 @method_decorator(staff_member_required, name='dispatch')
 class AddInventoryItemView(LoginRequiredMixin, View):
     def get(self, request):
-        form = InventoryItemForm()
+        form = AddInventoryItemForm()
         return render(request, 'admin/add_inventory_item.html', {'form': form})
 
     def post(self, request):
-        form = InventoryItemForm(request.POST, request.FILES)
+        form = AddInventoryItemForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            messages.success(request, "New inventory item added successfully!")
-            return redirect('admin_dashboard')  # Redirect to admin dashboard or another page
+            # Process form data and save the item with updated quantity
+            item = form.cleaned_data['existing_item']
+            additional_quantity = form.cleaned_data['quantity']
+            reference_no = form.cleaned_data['reference_no']
+            item.quantity += additional_quantity
+            item.save()
+            
+            # Create a log entry
+            UpdateLog.objects.create(
+                item=item,
+                quantity_added=additional_quantity,
+                reference_no=reference_no,
+                updated_by=request.user  # Log the user who made the update
+            )
+            
+            messages.success(request, "Quantity added to the inventory item successfully!")
+        
+        # Render the form again if it is invalid
         return render(request, 'admin/add_inventory_item.html', {'form': form})
 
 

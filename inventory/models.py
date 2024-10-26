@@ -46,3 +46,14 @@ class RequisitionItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity_requested} of {self.inventory_item.name} (Requisition {self.requisition.id})"
+    
+    
+class UpdateLog(models.Model):
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity_added = models.PositiveIntegerField()
+    reference_no = models.CharField(max_length=200)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.item.name} - {self.quantity_added} added on {self.updated_at.strftime('%Y-%m-%d %H:%M')}"

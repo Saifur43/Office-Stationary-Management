@@ -5,17 +5,25 @@
     <div class="col-md-8 col-12 mx-auto mt-5">
         <div class="card shadow-lg">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Add New Inventory Item</h3>
+                <h3 class="mb-0">Update Inventory</h3>
             </div>
             <div class="card-body">
+                <!-- Success Message Display -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
                 <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {% csrf_token %}
                     
-                    <!-- Item Name -->
+                    <!-- Existing Item Selection -->
                     <div class="form-group mb-3">
-                        <label for="id_name">Item Name</label>
-                        <input type="text" class="form-control" id="id_name" name="name" value="{{ form.name.value|default_if_none:'' }}">
-                        {% for error in form.name.errors %}
+                        <label for="id_existing_item">Select Item</label>
+                        {{ form.existing_item }}
+                        {% for error in form.existing_item.errors %}
                             <div class="text-danger">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -23,73 +31,24 @@
                     <!-- Reference Number -->
                     <div class="form-group mb-3">
                         <label for="id_reference_no">Reference Number</label>
-                        <input type="text" class="form-control" id="id_reference_no" name="reference_no" value="{{ form.reference_no.value|default_if_none:'' }}">
+                        {{ form.reference_no }}
                         {% for error in form.reference_no.errors %}
                             <div class="text-danger">{{ error }}</div>
                         {% endfor %}
                     </div>
 
-                    <!-- Unit -->
+                    <!-- Quantity to Add -->
                     <div class="form-group mb-3">
-                        <label for="id_unit">Unit</label>
-                        <input type="text" class="form-control" id="id_unit" name="unit" value="{{ form.unit.value|default_if_none:'' }}">
-                        {% for error in form.unit.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Quantity -->
-                    <div class="form-group mb-3">
-                        <label for="id_quantity">Quantity</label>
-                        <input type="number" class="form-control" id="id_quantity" name="quantity" value="{{ form.quantity.value|default_if_none:'' }}">
+                        <label for="id_quantity">Quantity to Add</label>
+                        {{ form.quantity }}
                         {% for error in form.quantity.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Category -->
-                    <div class="form-group mb-3">
-                        <label for="id_category">Category</label>
-                        <select class="form-control" id="id_category" name="category">
-                            {% for category in form.category.field.queryset %}
-                                <option value="{{ category.id }}" {% if category.id == form.category.value %}selected{% endif %}>{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
-                        {% for error in form.category.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Date Created -->
-                    <div class="form-group mb-3">
-                        <label for="id_date_created">Date Created</label>
-                        <input type="date" class="form-control" id="id_date_created" name="date_created" value="{{ form.date_created.value|default_if_none:'' }}">
-                        {% for error in form.date_created.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Remarks -->
-                    <div class="form-group mb-3">
-                        <label for="id_remarks">Remarks</label>
-                        <textarea class="form-control" id="id_remarks" name="remarks">{{ form.remarks.value|default_if_none:'' }}</textarea>
-                        {% for error in form.remarks.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Reference PDF -->
-                    <div class="form-group mb-3">
-                        <label for="id_reference_pdf">Reference PDF</label>
-                        <input type="file" class="form-control-file" id="id_reference_pdf" name="reference_pdf">
-                        {% for error in form.reference_pdf.errors %}
                             <div class="text-danger">{{ error }}</div>
                         {% endfor %}
                     </div>
 
                     <!-- Submit and Cancel Buttons -->
                     <div class="d-grid gap-2 d-md-block">
-                        <button type="submit" class="btn btn-success btn-lg">Add Item</button>
+                        <button type="submit" class="btn btn-success btn-lg">Add Quantity</button>
                         <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-lg">Cancel</a>
                     </div>
                 </form>
