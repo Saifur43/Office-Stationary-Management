@@ -4,12 +4,13 @@
 <div class="row">
     <div class="col-md-10 col-12 mx-auto mt-5">
         <h2>Approve Requisition {{ requisition.id }}</h2>
-        <form method="POST">
+        <form method="POST" onsubmit="return validateQuantities()">
             {% csrf_token %}
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
                         <th scope="col">Item Name</th>
+                        <th scope="col">Available Quantity</th>
                         <th scope="col">Requested Quantity</th>
                         <th scope="col">Approved Quantity</th>
                     </tr>
@@ -18,10 +19,12 @@
                     {% for item in requisition.items.all %}
                     <tr>
                         <td>{{ item.inventory_item.name }}</td>
+                        <td>{{ item.inventory_item.quantity }}</td>
                         <td>{{ item.quantity_requested }}</td>
                         <td>
                             <input type="number" name="approved_quantity_{{ item.id }}" 
-                                   value="{{ item.quantity_approved|default:item.quantity_requested }}" min="0">
+                                   value="{{ item.quantity_approved|default:item.quantity_requested }}" 
+                                   min="0" max="{{ item.inventory_item.quantity }}" class="approved-quantity">
                         </td>
                     </tr>
                     {% endfor %}
@@ -29,6 +32,20 @@
             </table>
             <button type="submit" class="btn btn-primary">Approve Requisition</button>
         </form>
+        
+        <script>
+            function validateQuantities() {
+                let isValid = true;
+                document.querySelectorAll('.approved-quantity').forEach(input => {
+                    const maxQuantity = parseInt(input.getAttribute('max'));
+                    if (parseInt(input.value) > maxQuantity) {
+                        alert(`Approved quantity cannot exceed available quantity for ${input.name}.`);
+                        isValid = false;
+                    }
+                });
+                return isValid;
+            }
+        </script>
     </div>
 </div>
 {% endblock %}

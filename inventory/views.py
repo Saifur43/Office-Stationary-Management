@@ -18,6 +18,11 @@ from io import BytesIO
 from django.template.loader import get_template
 from django.db.models import Q
 from .models import Requisition, User
+from weasyprint import HTML
+from weasyprint.text.fonts import FontConfiguration
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
@@ -88,7 +93,7 @@ class ApproveRequisitionView(LoginRequiredMixin, View):
             messages.error(request, "This requisition has already been approved or rejected and cannot be edited.")
             return redirect('requisition_list')  # Redirect to requisition list
 
-        return render(request, 'inventory/approve_requisition.html', {'requisition': requisition})
+        return render(request, 'admin/approve_requisition.html', {'requisition': requisition})
 
     def post(self, request, requisition_id):
         requisition = get_object_or_404(Requisition, id=requisition_id)
@@ -152,35 +157,7 @@ class RequisitionListView(LoginRequiredMixin, View):
             'requisitions': requisitions,
             'users': users,
         })
-"""
-class RequisitionPDFView(LoginRequiredMixin, View):
-    def get(self, request, requisition_id):
-        requisition = Requisition.objects.get(id=requisition_id)
-        
-        if requisition.status != 'Approved':
-            return HttpResponse("Requisition is not approved yet.", status=403)
 
-        # Fetch requisition items
-        requisition_items = requisition.items.all()
-
-        # Render the HTML template with requisition details
-        template = get_template('admin/rqpdf.html')
-        context = {
-            'requisition': requisition,
-            'requisition_items': requisition_items
-        }
-        html = template.render(context)
-
-        # Generate PDF
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="requisition_{requisition.id}.pdf"'
-        pisa_status = pisa.CreatePDF(html, dest=response)
-
-        if pisa_status.err:
-            return HttpResponse('Error occurred while generating PDF', status=500)
-
-        return response
-"""
 @method_decorator(staff_member_required, name='dispatch')
 class AdminDashboardView(LoginRequiredMixin, View):
     def get(self, request):
@@ -203,6 +180,7 @@ class AddInventoryItemView(LoginRequiredMixin, View):
             item = form.cleaned_data['existing_item']
             additional_quantity = form.cleaned_data['quantity']
             reference_no = form.cleaned_data['reference_no']
+            old_item = item.quantity
             item.quantity += additional_quantity
             item.save()
             
@@ -214,7 +192,7 @@ class AddInventoryItemView(LoginRequiredMixin, View):
                 updated_by=request.user  # Log the user who made the update
             )
             
-            messages.success(request, "Quantity added to the inventory item successfully!")
+            messages.success(request, f"{old_item} + {additional_quantity} = {item.quantity}, Quantity added to the inventory item successfully!")
         
         # Render the form again if it is invalid
         return render(request, 'admin/add_inventory_item.html', {'form': form})
@@ -342,34 +320,6 @@ class SignUpView(View):
 		return render(request, 'auth/signup.html', {'form': form})
 
 
-"""
-
-class RequisitionPDFView(LoginRequiredMixin, View):
-    def get(self, request, requisition_id):
-        requisition = Requisition.objects.get(id=requisition_id)
-
-        if requisition.status != 'Approved':
-            return HttpResponse("Requisition is not approved yet.", status=403)
-
-        # Fetch requisition items
-        requisition_items = requisition.items.all()
-
-        # Generate and return the PDF
-        return generate_requisition_pdf(requisition, requisition_items)
-"""
-
-
-from django.views import View
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
-from weasyprint import HTML
-from weasyprint.text.fonts import FontConfiguration
-import logging
-
-logger = logging.getLogger(__name__)
-
 class RequisitionPDFView(LoginRequiredMixin, View):
     def get(self, request, requisition_id):
         try:
@@ -404,3 +354,51 @@ class RequisitionPDFView(LoginRequiredMixin, View):
         except Exception as e:
             logger.error(f'Error generating PDF: {str(e)}')
             return HttpResponse('Error generating PDF', status=500)
+        
+
+"""
+class RequisitionPDFView(LoginRequiredMixin, View):
+    def get(self, request, requisition_id):
+        requisition = Requisition.objects.get(id=requisition_id)
+        
+        if requisition.status != 'Approved':
+            return HttpResponse("Requisition is not approved yet.", status=403)
+
+        # Fetch requisition items
+        requisition_items = requisition.items.all()
+
+        # Render the HTML template with requisition details
+        template = get_template('admin/rqpdf.html')
+        context = {
+            'requisition': requisition,
+            'requisition_items': requisition_items
+        }
+        html = template.render(context)
+
+        # Generate PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="requisition_{requisition.id}.pdf"'
+        pisa_status = pisa.CreatePDF(html, dest=response)
+
+        if pisa_status.err:
+            return HttpResponse('Error occurred while generating PDF', status=500)
+
+        return response
+"""
+
+
+"""
+
+class RequisitionPDFView(LoginRequiredMixin, View):
+    def get(self, request, requisition_id):
+        requisition = Requisition.objects.get(id=requisition_id)
+
+        if requisition.status != 'Approved':
+            return HttpResponse("Requisition is not approved yet.", status=403)
+
+        # Fetch requisition items
+        requisition_items = requisition.items.all()
+
+        # Generate and return the PDF
+        return generate_requisition_pdf(requisition, requisition_items)
+"""
