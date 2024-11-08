@@ -1,51 +1,146 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Report</title>
+    <title>চাহিদাপত্র</title>
     <style>
+        @font-face {
+            font-family: 'Kalpurush';
+            src: url("{% static 'fonts/Kalpurush.ttf' %}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Kalpurush', sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 25px;
+            border: 1px solid black;
+            page-break-after: always;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+
+        .logo img {
+            max-width: 15%;
+            height: auto;
+        }
+
+        .header, .subheader {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .header {
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        .subheader {
+            font-size: 16px;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-decoration: underline;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .info-section div {
+            width: 48%;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
         }
-        table, th, td {
-            border: 1px solid black;
-        }
+
         th, td {
-            padding: 8px;
-            text-align: left;
+            border: 1px solid black;
+            padding: 4px;
+            text-align: center;
         }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        .info-section, th, td {
+            line-height: 1.5;
+        }
+
     </style>
 </head>
 <body>
-    <h2>Report</h2>
 
-    <p><strong>User:</strong> {{ user.username}}</p>
-    <p><strong>Item:</strong> {{ item.name}}</p>
-    <p><strong>Date From:</strong> {{ date_from }}</p>
-    <p><strong>Date To:</strong> {{ date_to}}</p>
+    <div class="container">
+        <!-- Logo Section -->
+        <div class="logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/c/c0/BAPEX.png" alt="Company Logo">
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Item</th>
-                <th>Requested Quantity</th>
-                <th>Approved Quantity</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in requisition_items %}
-            <tr>
-                <td>{{ item.requisition.user.username }}</td>
-                <td>{{ item.inventory_item.name }}</td>
-                <td>{{ item.quantity_requested }}</td>
-                <td>{{ item.quantity_approved }}</td>
-                <td>{{ item.requisition.date_created }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="header">বাংলাদেশ পেট্রোলিয়াম এক্সপ্লোরেশন এন্ড প্রোডাকশন কোম্পানি লিঃ (বাপেক্স)</div>
+        <div class="subheader">রিপোর্ট</div>
+
+        <div class="info-section">
+
+            <div>
+                <p>চাহিদাকারী বিভাগ: {{ user.username}}</p>
+                <p>Item: {{ item.name}}</p>
+            </div>
+            <div style="text-align: right;">
+                <p>Date From: {{ date_from }}</p>
+                <p>Date To: {{ date_to}}</p>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>চাহিদাকারী বিভাগ</th>
+                        <th>মালামালের নাম</th>
+                        <th>একক</th>
+                        <th>দরকারী পরিমাণ</th>
+                        <th>অনুমোদিত পরিমাণ</th>
+                        <th>তারিখ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in requisition_items %}
+                    <tr>
+                        <td>{{ item.requisition.user.username }}</td>
+                        <td>{{ item.inventory_item.name }}</td>
+                        <td>{{ item.inventory_item.unit }}</td>
+                        <td>{{ item.quantity_requested }}</td>
+                        <td>{{ item.quantity_approved }}</td>
+                        <td>{{ item.requisition.date_created }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+   
+    </div>
+
 </body>
 </html>

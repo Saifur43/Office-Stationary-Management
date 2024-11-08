@@ -32,7 +32,7 @@ class Requisition(models.Model):
         ('Rejected', 'Rejected'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # The user making the requisition
-    date_created = models.DateTimeField(auto_now_add=True)  # Automatically set to the current timestamp
+    date_created = models.DateField(auto_now_add=True)  # Automatically set to the current timestamp
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
 
     def __str__(self):
@@ -52,8 +52,18 @@ class UpdateLog(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
     quantity_added = models.PositiveIntegerField()
     reference_no = models.CharField(max_length=200)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateField(auto_now_add=True)
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    reference_pdf = models.FileField(upload_to='inventory_pdfs/', blank=True, null=True)
 
     def __str__(self):
-        return f"{self.item.name} - {self.quantity_added} added on {self.updated_at.strftime('%Y-%m-%d %H:%M')}"
+        return f"{self.item.name} - {self.quantity_added} added on {self.updated_at.strftime('%Y-%m-%d')}"
+    
+    
+class RequisitionApprovalLog(models.Model):
+    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
+    approved_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    approved_at = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Requisition {self.requisition.id} by {self.approved_by.username} on {self.approved_at}"

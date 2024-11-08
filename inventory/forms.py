@@ -68,6 +68,12 @@ class AddInventoryItemForm(forms.Form):
         label="Quantity to Add",
         widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
+    
+    reference_pdf = forms.FileField(
+        label="File to Upload",
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+        )
+    
 
 
 

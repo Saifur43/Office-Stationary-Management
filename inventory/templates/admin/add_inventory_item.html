@@ -37,6 +37,15 @@
                         {% endfor %}
                     </div>
 
+                    <!-- Reference Pdf -->
+                    <div class="form-group mb-3">
+                        <label for="id_reference_pdf">Upload Reference PDF</label>
+                        {{ form.reference_pdf }}
+                        {% for error in form.reference_pdf.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
                     <!-- Quantity to Add -->
                     <div class="form-group mb-3">
                         <label for="id_quantity">Quantity to Add</label>

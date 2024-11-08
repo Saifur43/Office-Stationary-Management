@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import UserRegisterForm, InventoryItemForm, ReportForm, AddInventoryItemForm
 from inventory_management.settings import LOW_QUANTITY
-from .models import InventoryItem, Requisition, RequisitionItem, UpdateLog
+from .models import InventoryItem, Requisition, RequisitionItem, UpdateLog, RequisitionApprovalLog
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
@@ -13,7 +13,6 @@ from django.utils.decorators import method_decorator
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from xhtml2pdf import pisa
 from io import BytesIO
 from django.template.loader import get_template
 from django.db.models import Q
@@ -21,6 +20,7 @@ from .models import Requisition, User
 from weasyprint import HTML
 from weasyprint.text.fonts import FontConfiguration
 import logging
+from xhtml2pdf import pisa
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class ApproveRequisitionView(LoginRequiredMixin, View):
         # Check if the requisition status is approved or rejected
         if requisition.status in ['Approved', 'Rejected']:
             messages.error(request, "This requisition has already been approved or rejected and cannot be edited.")
-            return redirect('requisition_list')  # Redirect to requisition list
+            return redirect('requisition_list')  
 
         return render(request, 'admin/approve_requisition.html', {'requisition': requisition})
 
@@ -101,7 +101,7 @@ class ApproveRequisitionView(LoginRequiredMixin, View):
         # Check if the requisition status is approved or rejected
         if requisition.status in ['Approved', 'Rejected']:
             messages.error(request, "This requisition has already been approved or rejected and cannot be edited.")
-            return redirect('requisition_list')  # Redirect to requisition list
+            return redirect('requisition_list') 
 
         # Process approved quantities and update inventory
         for item in requisition.items.all():
@@ -110,20 +110,27 @@ class ApproveRequisitionView(LoginRequiredMixin, View):
                 try:
                     approved_quantity = int(approved_quantity)
                     if approved_quantity >= 0:
-                        item.quantity_approved = approved_quantity  # Update the approved quantity
+                        item.quantity_approved = approved_quantity 
                         item.save()
-                        
+
                         # Subtract approved quantity from the actual inventory
                         inventory_item = get_object_or_404(InventoryItem, id=item.inventory_item.id)
-                        inventory_item.quantity -= approved_quantity  # Subtract approved quantity
+                        inventory_item.quantity -= approved_quantity
                         inventory_item.save()
                 except ValueError:
                     continue  # Ignore invalid inputs
 
         requisition.status = 'Approved'
         requisition.save()
+        
+        RequisitionApprovalLog.objects.create(
+            requisition=requisition,
+            approved_by=request.user,
+        )
+        
         messages.success(request, "Requisition approved successfully!")
-        return redirect('requisition_list')  # Redirect to the requisition list page
+        return redirect('requisition_list') 
+
 
 class RequisitionListView(LoginRequiredMixin, View):
     def get(self, request):
@@ -180,16 +187,18 @@ class AddInventoryItemView(LoginRequiredMixin, View):
             item = form.cleaned_data['existing_item']
             additional_quantity = form.cleaned_data['quantity']
             reference_no = form.cleaned_data['reference_no']
+            reference_pdf = form.cleaned_data['reference_pdf'] 
             old_item = item.quantity
             item.quantity += additional_quantity
             item.save()
             
             # Create a log entry
-            UpdateLog.objects.create(
+            log_entry = UpdateLog.objects.create(
                 item=item,
                 quantity_added=additional_quantity,
                 reference_no=reference_no,
-                updated_by=request.user  # Log the user who made the update
+                updated_by=request.user,
+                reference_pdf=reference_pdf  # Save the uploaded PDF with the log entry
             )
             
             messages.success(request, f"{old_item} + {additional_quantity} = {item.quantity}, Quantity added to the inventory item successfully!")
@@ -272,30 +281,26 @@ class ReportView(View):
         return render(request, 'admin/report.html', {'form': form})
 
     def generate_pdf(self, requisition_items, user, item_name, date_from, date_to):
-        template_path = 'admin/report_pdf.html'
-        context = {
+
+        html_string = render_to_string('admin/report_pdf.html', {
             'requisition_items': requisition_items,
             'user': user,
             'item': item_name,
             'date_from': date_from,
             'date_to': date_to
-        }
+        })
+        
+         # Configure fonts
+        font_config = FontConfiguration()
+            
+            # Generate PDF
+        html = HTML(string=html_string)
+        pdf = html.write_pdf(font_config=font_config)
 
-        # Render the HTML template into a string
-        html = render_to_string(template_path, context)
-
-        # Create a PDF
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="report.pdf"'
-
-        # Create a PDF using xhtml2pdf
-        pisa_status = pisa.CreatePDF(
-            html, dest=response
-        )
-
-        # Return the response if no errors
-        if pisa_status.err:
-            return HttpResponse('We had some errors generating the PDF', status=500)
+            # Create response
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="report.pdf"'
+            
         return response
 
 
@@ -325,6 +330,8 @@ class RequisitionPDFView(LoginRequiredMixin, View):
         try:
             # Get requisition
             requisition = get_object_or_404(Requisition, id=requisition_id)
+            approval = get_object_or_404(RequisitionApprovalLog, requisition=requisition)
+            print(approval)
 
             # Fetch items
             requisition_items = requisition.items.all()
@@ -335,7 +342,8 @@ class RequisitionPDFView(LoginRequiredMixin, View):
                 'requisition': requisition,
                 'requisition_items': requisition_items,
                  "labels": labels,
-                 "user": request.user
+                 "user": request.user,
+                 "approval":approval
             })
 
             # Configure fonts
