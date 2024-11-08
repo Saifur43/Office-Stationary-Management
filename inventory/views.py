@@ -325,17 +325,17 @@ class RequisitionPDFView(LoginRequiredMixin, View):
         try:
             # Get requisition
             requisition = get_object_or_404(Requisition, id=requisition_id)
-            
-            if requisition.status != 'Approved':
-                return HttpResponse("Requisition is not approved yet.", status=403)
 
             # Fetch items
             requisition_items = requisition.items.all()
+            labels = ["চাহিদাকারী বিভাগ কপি", "হিসাব বিভাগ কপি", "ভান্ডার উপবিভাগ কপি"]
 
             # Render HTML
-            html_string = render_to_string('admin/rqpdf.html', {
+            html_string = render_to_string('inventory/rqpdfu.html', {
                 'requisition': requisition,
                 'requisition_items': requisition_items,
+                 "labels": labels,
+                 "user": request.user
             })
 
             # Configure fonts
@@ -353,8 +353,7 @@ class RequisitionPDFView(LoginRequiredMixin, View):
 
         except Exception as e:
             logger.error(f'Error generating PDF: {str(e)}')
-            return HttpResponse('Error generating PDF', status=500)
-        
+            return HttpResponse('Error generating PDF', status=500)        
 
 """
 class RequisitionPDFView(LoginRequiredMixin, View):

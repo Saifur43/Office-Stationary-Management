@@ -9,9 +9,9 @@
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Name</th>
-                            <th scope="col">Qty</th>
+                            <!-- <th scope="col">Qty</th> -->
                             <th scope="col">Category</th>
-                            <th scope="col">Requisition Qty</th> <!-- New column for input -->
+                            <th scope="col">Requisition Qty</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,11 +29,11 @@
                         <tr>
                             <th scope="row">{{ item.id }}</th>
                             <td>{{ item.name }}</td>
-                            {% if item.id in low_inventory_ids %}
+                           <!--  {% if item.id in low_inventory_ids %}
                                 <td class="text-danger">{{ item.quantity }}</td>
                             {% else %}
                                 <td class="text-success">{{ item.quantity }}</td>
-                            {% endif %}
+                            {% endif %} -->
                             <td>{{ item.category.name}}</td>
                             <td>
                                 <input type="number" name="quantities_{{ item.id }}" min="0" class="form-control" placeholder="Enter quantity">
