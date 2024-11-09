@@ -63,7 +63,7 @@
             <tbody>
                 {% for requisition in requisitions %}
                 <tr>
-                    <th scope="row">{{ requisition.id }}</th>
+                    <th scope="row">{{ requisition.requisition_id }}</th>
                     <td>{{ requisition.user.username }}</td>
                     <td>{{ requisition.date_created }}</td>
                     <td>{{ requisition.status }}</td>

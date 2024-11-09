@@ -3,7 +3,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>চাহিদাপত্র</title>
+    <title>রিপোর্ট</title>
     <style>
         @font-face {
             font-family: 'Kalpurush';
@@ -120,8 +120,8 @@
                         <th>চাহিদাকারী বিভাগ</th>
                         <th>মালামালের নাম</th>
                         <th>একক</th>
-                        <th>দরকারী পরিমাণ</th>
                         <th>অনুমোদিত পরিমাণ</th>
+                        <th>চাহিদাপত্র নং</th>
                         <th>তারিখ</th>
                     </tr>
                 </thead>
@@ -131,8 +131,8 @@
                         <td>{{ item.requisition.user.username }}</td>
                         <td>{{ item.inventory_item.name }}</td>
                         <td>{{ item.inventory_item.unit }}</td>
-                        <td>{{ item.quantity_requested }}</td>
                         <td>{{ item.quantity_approved }}</td>
+                        <td>{{ item.requisition.requisition_id }}</td>
                         <td>{{ item.requisition.date_created }}</td>
                     </tr>
                     {% endfor %}
