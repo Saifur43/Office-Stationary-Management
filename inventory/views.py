@@ -139,7 +139,7 @@ class RequisitionListView(LoginRequiredMixin, View):
         # Filter by Requisition ID
         requisition_id = request.GET.get('requisition_id')
         if requisition_id:
-            requisitions = requisitions.filter(id=requisition_id)
+            requisitions = requisitions.filter(requisition_id=requisition_id)
         
         # Filter by User
         user_id = request.GET.get('user')
@@ -330,9 +330,10 @@ class RequisitionPDFView(LoginRequiredMixin, View):
         try:
             # Get requisition
             requisition = get_object_or_404(Requisition, id=requisition_id)
-            approval = get_object_or_404(RequisitionApprovalLog, requisition=requisition)
-            print(approval)
-
+            if requisition.status == 'Approved':
+                approval = get_object_or_404(RequisitionApprovalLog, requisition=requisition)
+            else:
+                approval = None
             # Fetch items
             requisition_items = requisition.items.all()
             labels = ["চাহিদাকারী বিভাগ কপি", "হিসাব বিভাগ কপি", "ভান্ডার উপবিভাগ কপি"]

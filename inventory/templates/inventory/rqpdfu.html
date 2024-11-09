@@ -3,7 +3,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>চাহিদাপত্র / ক্রয় তালিকা</title>
+    <title>চাহিদাপত্র</title>
     <style>
         @font-face {
             font-family: 'Kalpurush';
@@ -51,6 +51,8 @@
         .subheader {
             font-size: 16px;
             margin-bottom: 20px;
+            text-decoration: underline;
+            padding: 10px;
         }
 
         .info-section {
@@ -132,12 +134,12 @@
         </div>
 
         <div class="header">বাংলাদেশ পেট্রোলিয়াম এক্সপ্লোরেশন এন্ড প্রোডাকশন কোম্পানি লিঃ (বাপেক্স)</div>
-        <div class="subheader">চাহিদাপত্র / ক্রয় তালিকা</div>
+        <div class="subheader">স্থানীয় অধিযাচন / চাহিদাপত্র</div>
 
         <div class="info-section">
             <div>
-                <p>চাহিদাকারী বিভাগ: {{ requisition.user.username }}</p>
-                <p>চাহিদাপত্র নং: {{ requisition.id }}</p>
+                <p>চাহিদাকারী বিভাগ: {{ requisition.user.first_name }} বিভাগ</p>
+                <p>চাহিদাপত্র নং: {{ requisition.requisition_id }}</p>
             </div>
             <div style="text-align: right;">
                 <p>অবস্থা: {{ requisition.status }}</p>
@@ -178,7 +180,7 @@
             <div class="signature-box">
                 <div class="line"></div>
                 <p>চাহিদাকারী</p>
-                <p>{{ requisition.user.username }} বিভাগ</p>
+                <p>{{ requisition.user.first_name }} বিভাগ</p>
             </div>
             <div class="signature-box">
                 <div class="line"></div>
@@ -195,7 +197,7 @@
             </div>
             {% else %}
             <div class="admin-label">
-                Not yet approved. 
+                This requisition is not approved yet. Please contact with Store Department.
             </div>
             {% endif %}
         </td>
