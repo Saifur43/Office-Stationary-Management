@@ -2,30 +2,59 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center">Approved Items Statistics</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Item</th>
-                    <th>Total Approved Quantity</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if item_stats %}
-                    {% for item in item_stats %}
-                    <tr>
-                        <td><a href="{% url 'stat_item_detail' item.inventory_item__id %}">{{ item.inventory_item__name }}</a></td>
-                        <td>{{ item.total_approved }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="2" class="text-center">No approved items found</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+    <div class="card shadow-sm border-0 rounded">
+        <div class="card-header bg-success text-white text-center">
+            <h2 class="mb-0">Approved Items Statistics</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th>Item</th>
+                            <th>Total Approved Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if item_stats %}
+                            {% for item in item_stats %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'stat_item_detail' item.inventory_item__id %}" class="text-decoration-none text-primary">
+                                        {{ item.inventory_item__name }}
+                                    </a>
+                                </td>
+                                <td>{{ item.total_approved }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">No approved items found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+<style>
+/* Additional styling for statistics table */
+.card-header {
+    font-weight: bold;
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+}
+
+/* Darken table text color */
+.table td, .table th {
+    vertical-align: middle;
+    text-align: center;
+    color: #343a40;  /* Dark gray color for better contrast */
+}
+
+.table-striped tbody tr:hover {
+    background-color: #f1f1f1;
+}
+</style>
 {% endblock %}
